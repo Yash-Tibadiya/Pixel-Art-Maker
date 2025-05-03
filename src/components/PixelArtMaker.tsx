@@ -21,19 +21,40 @@ const PixelArtMaker = () => {
     setGrid(newGrid);
   };
 
+  const handleGridSizeChange = (newGridSize: number) => {
+    setGridSize(newGridSize);
+    setGrid(Array(newGridSize * newGridSize).fill(DEFAULT_GRID_COLOR));
+  };
+
   return (
-    <div
-      className="grid w-[30rem] h-[30rem]"
-      style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
-    >
-      {grid.map((color, index) => (
-        <div
-          key={index}
-          onClick={() => handleCellClick(index)}
-          style={{ backgroundColor: color }}
-          className="border"
+    <div className="flex flex-col items-center justify-center gap-5">
+      <div className="flex gap-3">
+        <label htmlFor="grid-size">Grid Size: </label>
+        <input
+          type="number"
+          value={gridSize}
+          onChange={(e) => handleGridSizeChange(Number(e.target.value))}
         />
-      ))}
+        <label htmlFor="pick-color">Pick Color: </label>
+        <input
+          type="color"
+          value={selectedColor}
+          onChange={(e) => setSelectedColor(e.target.value)}
+        />
+      </div>
+      <div
+        className="grid w-[30rem] h-[30rem]"
+        style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
+      >
+        {grid.map((color, index) => (
+          <div
+            key={index}
+            onClick={() => handleCellClick(index)}
+            style={{ backgroundColor: color }}
+            className="border"
+          />
+        ))}
+      </div>
     </div>
   );
 };
