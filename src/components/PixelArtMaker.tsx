@@ -77,7 +77,6 @@ const PixelArtMaker = () => {
             id="grid-size"
             type="number"
             min="1"
-            max="32"
             value={gridSize}
             onChange={(e) => handleGridSizeChange(Number(e.target.value))}
             className="w-16 p-1 border rounded"
