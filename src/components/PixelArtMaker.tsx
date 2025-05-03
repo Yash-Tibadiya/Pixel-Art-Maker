@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const DEFAULT_GRID_SIZE = 16;
 const DEFAULT_GRID_COLOR = "#fff";
@@ -14,16 +14,54 @@ const PixelArtMaker = () => {
   const [selectedColor, setSelectedColor] = useState<string>(
     DEFAULT_SELECTED_COLOR
   );
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const handleCellClick = (index: number) => {
     const newGrid = [...grid];
-    newGrid[index] = selectedColor;
+    // Toggle between selected color and default color
+    newGrid[index] =
+      newGrid[index] === selectedColor ? DEFAULT_GRID_COLOR : selectedColor;
     setGrid(newGrid);
   };
 
   const handleGridSizeChange = (newGridSize: number) => {
     setGridSize(newGridSize);
     setGrid(Array(newGridSize * newGridSize).fill(DEFAULT_GRID_COLOR));
+  };
+
+  const handleDownload = () => {
+    console.log("handleDownload called");
+    if (!gridRef.current) {
+      console.log("gridRef.current is null");
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    const pixelSize = 20; // Size of each pixel in the output image
+    canvas.width = gridSize * pixelSize;
+    canvas.height = gridSize * pixelSize;
+    const ctx = canvas.getContext("2d");
+
+    if (ctx) {
+      console.log("Canvas context obtained");
+      // Draw each cell to the canvas
+      grid.forEach((color, index) => {
+        const x = (index % gridSize) * pixelSize;
+        const y = Math.floor(index / gridSize) * pixelSize;
+
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, pixelSize, pixelSize);
+      });
+
+      // Create download link
+      const link = document.createElement("a");
+      link.download = "pixel-art.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      console.log("Download link clicked");
+    } else {
+      console.log("Could not get canvas context");
+    }
   };
 
   return (
@@ -63,13 +101,21 @@ const PixelArtMaker = () => {
           onClick={() =>
             setGrid(Array(gridSize * gridSize).fill(DEFAULT_GRID_COLOR))
           }
-          className="px-3 py-1 bg-red-500 text-white rounded"
+          className="px-3 py-1 bg-red-500 text-white rounded cursor-pointer"
         >
           Clear
+        </button>
+
+        <button
+          onClick={handleDownload}
+          className="px-3 py-1 bg-blue-500 text-white rounded cursor-pointer"
+        >
+          Download PNG
         </button>
       </div>
 
       <div
+        ref={gridRef}
         className="grid w-[36rem] h-[36rem] max-w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
         style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
       >
@@ -78,7 +124,7 @@ const PixelArtMaker = () => {
             key={index}
             onClick={() => handleCellClick(index)}
             style={{ backgroundColor: color }}
-            className="border border-gray-200 dark:border-gray-700 hover:opacity-90 transition-opacity"
+            className="border border-gray-200"
           />
         ))}
       </div>
